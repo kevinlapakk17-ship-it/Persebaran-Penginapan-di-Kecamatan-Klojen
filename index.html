@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="data/PointPembangunanAtribut_1.js"></script>
+        <script src="data/Batas_Admin_Kelurahan_Kecamatan_Klojen_2.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-7.9871818125445175,112.60328685040835],[-7.954647027800327,112.64751101412642]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_PointPembangunanAtribut_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(String(feature.properties['id']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(String(feature.properties['Nama']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Tipe'] !== null ? autolinker.link(String(feature.properties['Tipe']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Check In'] !== null ? autolinker.link(String(feature.properties['Check In']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Check Out'] !== null ? autolinker.link(String(feature.properties['Check Out']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['No. Kontak'] !== null ? autolinker.link(String(feature.properties['No. Kontak']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama Jalan'] !== null ? autolinker.link(String(feature.properties['Nama Jalan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kelurahan'] !== null ? autolinker.link(String(feature.properties['Kelurahan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Kecamatan'] !== null ? autolinker.link(String(feature.properties['Kecamatan']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Provinsi'] !== null ? autolinker.link(String(feature.properties['Provinsi']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_PointPembangunanAtribut_1_0(feature) {
+            switch(String(feature.properties['Tipe'])) {
+                case 'Gues House':
+                    return {
+                pane: 'pane_PointPembangunanAtribut_1',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,66,232,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Homestay':
+                    return {
+                pane: 'pane_PointPembangunanAtribut_1',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(31,225,20,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Hotel':
+                    return {
+                pane: 'pane_PointPembangunanAtribut_1',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(219,212,78,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Resort':
+                    return {
+                pane: 'pane_PointPembangunanAtribut_1',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(20,29,205,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'Vila':
+                    return {
+                pane: 'pane_PointPembangunanAtribut_1',
+                radius: 6.0,
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,73,80,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_PointPembangunanAtribut_1');
+        map.getPane('pane_PointPembangunanAtribut_1').style.zIndex = 401;
+        map.getPane('pane_PointPembangunanAtribut_1').style['mix-blend-mode'] = 'normal';
+        var layer_PointPembangunanAtribut_1 = new L.geoJson(json_PointPembangunanAtribut_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_PointPembangunanAtribut_1',
+            layerName: 'layer_PointPembangunanAtribut_1',
+            pane: 'pane_PointPembangunanAtribut_1',
+            onEachFeature: pop_PointPembangunanAtribut_1,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_PointPembangunanAtribut_1_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_PointPembangunanAtribut_1);
+        map.addLayer(layer_PointPembangunanAtribut_1);
+        function pop_Batas_Admin_Kelurahan_Kecamatan_Klojen_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['OBJECTID'] !== null ? autolinker.link(String(feature.properties['OBJECTID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FCODE'] !== null ? autolinker.link(String(feature.properties['FCODE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['METADATA'] !== null ? autolinker.link(String(feature.properties['METADATA']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKD'] !== null ? autolinker.link(String(feature.properties['WADMKD']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKK'] !== null ? autolinker.link(String(feature.properties['WADMKK']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMPR'] !== null ? autolinker.link(String(feature.properties['WADMPR']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['UUPP'] !== null ? autolinker.link(String(feature.properties['UUPP']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#c1eb73',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#bf4fd5',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#512194',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#51bbe8',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#7189cb',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#933fc1',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#d87088',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#af377d',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#2ba637',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#2fa5e0',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#a1cb65',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#c1eb73',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#bf4fd5',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#512194',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#51bbe8',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#7189cb',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#933fc1',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#d87088',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#af377d',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#2ba637',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#2fa5e0',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        var pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.6,
+            color: '#a1cb65',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0.addTo(map);
+        function style_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0(feature) {
+            switch(String(feature.properties['WADMKD'])) {
+                case 'Bareng':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Gading Kasri':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Kasin':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Kauman':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Kiduldalem':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Klojen':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Oro-oro Dowo':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Penanggungan':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Rampalcelaket':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Samaan':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+                case 'Sukoharjo':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        function style_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_1(feature) {
+            switch(String(feature.properties['WADMKD'])) {
+                case 'Bareng':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(193,235,115,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Gading Kasri':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(191,79,213,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Kasin':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(81,33,148,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Kauman':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(81,187,232,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Kiduldalem':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(113,137,203,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Klojen':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(147,63,193,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Oro-oro Dowo':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(216,112,136,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Penanggungan':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(175,55,125,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Rampalcelaket':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(43,166,55,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Samaan':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(47,165,224,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+                case 'Sukoharjo':
+                    return {
+                pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+                opacity: 1,
+                color: 'rgba(161,203,101,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2');
+        map.getPane('pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2').style.zIndex = 402;
+        map.getPane('pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2').style['mix-blend-mode'] = 'normal';
+        var layer_Batas_Admin_Kelurahan_Kecamatan_Klojen_2 = new L.geoJson.multiStyle(json_Batas_Admin_Kelurahan_Kecamatan_Klojen_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+            layerName: 'layer_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+            pane: 'pane_Batas_Admin_Kelurahan_Kecamatan_Klojen_2',
+            onEachFeature: pop_Batas_Admin_Kelurahan_Kecamatan_Klojen_2,
+            styles: [style_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_0,style_Batas_Admin_Kelurahan_Kecamatan_Klojen_2_1,]
+        });
+        bounds_group.addLayer(layer_Batas_Admin_Kelurahan_Kecamatan_Klojen_2);
+        map.addLayer(layer_Batas_Admin_Kelurahan_Kecamatan_Klojen_2);
+        var overlaysTree = [
+            {label: 'Batas_Admin_Kelurahan_Kecamatan_Klojen<br /><table><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Bareng0.png" /></td><td>Bareng</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_GadingKasri1.png" /></td><td>Gading Kasri</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Kasin2.png" /></td><td>Kasin</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Kauman3.png" /></td><td>Kauman</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Kiduldalem4.png" /></td><td>Kiduldalem</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Klojen5.png" /></td><td>Klojen</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_OrooroDowo6.png" /></td><td>Oro-oro Dowo</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Penanggungan7.png" /></td><td>Penanggungan</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Rampalcelaket8.png" /></td><td>Rampalcelaket</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Samaan9.png" /></td><td>Samaan</td></tr><tr><td style="text-align: center;"><img src="legend/Batas_Admin_Kelurahan_Kecamatan_Klojen_2_Sukoharjo10.png" /></td><td>Sukoharjo</td></tr></table>', layer: layer_Batas_Admin_Kelurahan_Kecamatan_Klojen_2},
+            {label: 'Point Pembangunan +Atribut<br /><table><tr><td style="text-align: center;"><img src="legend/PointPembangunanAtribut_1_GuesHouse0.png" /></td><td>Gues House</td></tr><tr><td style="text-align: center;"><img src="legend/PointPembangunanAtribut_1_Homestay1.png" /></td><td>Homestay</td></tr><tr><td style="text-align: center;"><img src="legend/PointPembangunanAtribut_1_Hotel2.png" /></td><td>Hotel</td></tr><tr><td style="text-align: center;"><img src="legend/PointPembangunanAtribut_1_Resort3.png" /></td><td>Resort</td></tr><tr><td style="text-align: center;"><img src="legend/PointPembangunanAtribut_1_Vila4.png" /></td><td>Vila</td></tr></table>', layer: layer_PointPembangunanAtribut_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>
